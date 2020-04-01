@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Entities
+ build="b2219"
+ majorVersion="8"
+ minorVersion="4"
+ modelPersistenceProviderPackage="PostgresPersistenceProviderPackage"
+ revision="3"
+ schemaVersion="1041"
+ universal="password">
+    <Things>
+        <Thing
+         description=""
+         documentationContent=""
+         effectiveThingPackage="ConfiguredThing"
+         enabled="true"
+         homeMashup=""
+         identifier=""
+         lastModifiedDate="2020-04-01T10:28:16.983-04:00"
+         name="BWTestThing"
+         projectName="Simulator"
+         published="false"
+         tags=""
+         thingTemplate="GenericThing"
+         valueStream="">
+            <avatar></avatar>
+            <DesignTimePermissions>
+                <Create></Create>
+                <Read></Read>
+                <Update></Update>
+                <Delete></Delete>
+                <Metadata></Metadata>
+            </DesignTimePermissions>
+            <RunTimePermissions></RunTimePermissions>
+            <VisibilityPermissions>
+                <Visibility></Visibility>
+            </VisibilityPermissions>
+            <ConfigurationTableDefinitions></ConfigurationTableDefinitions>
+            <ConfigurationTables></ConfigurationTables>
+            <ThingShape>
+                <PropertyDefinitions></PropertyDefinitions>
+                <ServiceDefinitions></ServiceDefinitions>
+                <EventDefinitions></EventDefinitions>
+                <ServiceMappings></ServiceMappings>
+                <ServiceImplementations>
+                    <ServiceImplementation
+                     description=""
+                     handlerName="Script"
+                     name="ExecuteTest">
+                        <ConfigurationTables>
+                            <ConfigurationTable
+                             description=""
+                             isMultiRow="false"
+                             name="Script"
+                             ordinal="0">
+                                <DataShape>
+                                    <FieldDefinitions>
+                                        <FieldDefinition
+                                         baseType="STRING"
+                                         description="code"
+                                         name="code"
+                                         ordinal="0"></FieldDefinition>
+                                    </FieldDefinitions>
+                                </DataShape>
+                                <Rows>
+                                    <Row>
+                                        <code>
+                                        <![CDATA[
+                                        logger.debug("---Running test --- " + TestName) ; 
+                                        //execute your tests here
+                                        //this may involve executing one or more services
+                                        
+                                        
+                                        //compare output of the service with the "ExpectedOutput"
+                                        //mock calculation for the test result
+                                        var testResult = (Math.random() > 0.5) ? true: false; 
+                                        //Build the results infotable
+                                        var params = {
+                                            infoTableName : "InfoTable",
+                                            dataShapeName : "TestResultData"
+                                        };
+                                        
+                                        // CreateInfoTableFromDataShape(infoTableName:STRING("InfoTable"), dataShapeName:STRING):INFOTABtrLE(TestResultData)
+                                        var result = Resources["InfoTableFunctions"].CreateInfoTableFromDataShape(params);
+                                        PreviousTestResults.AddRow({
+                                            testName: TestName, 
+                                            inputParams: InputParams,
+                                            expectedOutput: ExpectedOutput,
+                                            timestamp: new Date(),
+                                            passed: testResult,
+                                            comments: testResult ? "passed" : "failed"
+                                        });
+                                        
+                                        //optionally store the results in a DataTable
+                                        var tags = new Array();
+                                        
+                                        // values:INFOTABLE(Datashape: TestResultData)
+                                        values.comments = testResult ? "passed" : ExpectedOutput.result; // STRING
+                                        values.inputParams = InputParams; // JSON
+                                        values.expectedOutput = ExpectedOutput; // JSON
+                                        values.passed = testResult; // BOOLEAN
+                                        values.testName = TestName; // STRING [Primary Key]
+                                        values.timestamp = new Date(); // DATETIME [Primary Key]
+                                        
+                                        // location:LOCATION
+                                        var location = new Object();
+                                        location.latitude = 0;
+                                        location.longitude = 0;
+                                        location.elevation = 0;
+                                        location.units ="WGS84";
+                                        
+                                        var params = {
+                                        	tags : tags,
+                                        	source : me.name,
+                                        	values : values,
+                                        	location : location
+                                        };
+                                        
+                                        // AddOrUpdateDataTableEntry(tags:TAGS, source:STRING("me.name"), values:INFOTABLE(TestResultsDT), location:LOCATION):STRING
+                                        var id = Things["TestResultsDT"].AddOrUpdateDataTableEntry(params);
+                                        result = PreviousTestResults;
+                                        ]]>
+                                        </code>
+                                    </Row>
+                                </Rows>
+                            </ConfigurationTable>
+                        </ConfigurationTables>
+                    </ServiceImplementation>
+                    <ServiceImplementation
+                     description=""
+                     handlerName="Script"
+                     name="RunAllTests">
+                        <ConfigurationTables>
+                            <ConfigurationTable
+                             description=""
+                             isMultiRow="false"
+                             name="Script"
+                             ordinal="0">
+                                <DataShape>
+                                    <FieldDefinitions>
+                                        <FieldDefinition
+                                         baseType="STRING"
+                                         description="code"
+                                         name="code"
+                                         ordinal="0"></FieldDefinition>
+                                    </FieldDefinitions>
+                                </DataShape>
+                                <Rows>
+                                    <Row>
+                                        <code>
+                                        <![CDATA[
+                                        var params = {
+                                        infoTableName : "InfoTable",
+                                        dataShapeName : "TestResultsData"
+                                        };
+                                        
+                                        var result = Resource["InfoTableFunctions"].CreateInfoTableFromDataShape(params);
+                                        
+                                        var FirstEntry = new Object();
+                                        FirstEntry.comments = "test result that passed the verification";//STRING
+                                        FirstEntry.inputParams = {"name": "Mike"}; // JSON
+                                        FirstEntry.expectedOutput = {"name": "Mike"};//JSON
+                                        FirstEntry.passed = true; // BOOLEAN
+                                        FirstEntry.testName = "Test for UseName Passed"; // STRING [Primary Key]
+                                        FirstEntry.timestamp = newDate(); // DATETIME [Primary Key]
+                                        
+                                        var SecondEntry = new Object();
+                                        SecondEntry.comments = "test result that failed the verification";//STRING
+                                        SecondEntry.inputParams = {"name": "John"}; // JSON
+                                        SecondEntry.expectedOutput = {"name": "Mike"};//JSON
+                                        SecondEntry.passed = false; // BOOLEAN
+                                        SecondEntry.testName = "Test for UseName Failed"; // STRING [Primary Key]
+                                        SecondEntry.timestamp = newDate(); // DATETIME [Primary Key]
+                                        result.AddRow(FirstEntry);
+                                        result.AddRow(SecondEntry);
+                                        ]]>
+                                        </code>
+                                    </Row>
+                                </Rows>
+                            </ConfigurationTable>
+                        </ConfigurationTables>
+                    </ServiceImplementation>
+                </ServiceImplementations>
+                <Subscriptions></Subscriptions>
+            </ThingShape>
+            <PropertyBindings></PropertyBindings>
+            <RemotePropertyBindings></RemotePropertyBindings>
+            <RemoteServiceBindings></RemoteServiceBindings>
+            <RemoteEventBindings></RemoteEventBindings>
+            <AlertConfigurations></AlertConfigurations>
+            <ImplementedShapes>
+                <ImplementedShape
+                 name="TestingTS"
+                 type="ThingShape"></ImplementedShape>
+            </ImplementedShapes>
+            <ThingProperties></ThingProperties>
+        </Thing>
+    </Things>
+</Entities>
